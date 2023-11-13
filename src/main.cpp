@@ -2,7 +2,7 @@
 #include "../include/matrix.hpp"
 
 int main() {
-     Matrix m{};
-
+    Matrix::Matrix m{2, 2};
+    Matrix::Matrix m1 = m;
      return 0;
 }
