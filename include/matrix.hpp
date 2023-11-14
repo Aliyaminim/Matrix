@@ -4,15 +4,17 @@
 #include <cassert>
 #include <cstdlib>
 #include <cmath>
+#include <tuple>
 
 //float elems, exceptions
-//virtual dtor
+//float comparator
+
 //size is int
-//может отнаследоваться как частный случай в квадратную матрицу
+//может отнаследоваться как частный случай в квадратную матрицу нет кринж
 
 namespace Matrix {
 
-class Matrix {
+class Matrix final {
 protected:
     int cols, rows;
 
@@ -35,6 +37,15 @@ public:
             for (int j = 0; j < cols_; ++j) 
                 arr[i][j] = val;
         }
+    }
+
+    // "конструктор" для создания единичной матрицы
+    static Matrix eye(int size) {
+        Matrix m{size, size};
+        for (int i = 0; i < size; ++i)
+            m[i][i] = 1;
+
+        return m;
     }
 
 public: //big five
@@ -85,8 +96,7 @@ public: //big five
         return *this;
     }
 
-    virtual ~Matrix() {
-        //contoversial
+    ~Matrix() {
         for (int i = 0; i < rows; ++i)
             delete [] arr[i].row;
         delete [] arr; 
@@ -102,42 +112,118 @@ public: //operators' overloading
         return arr[n];
     }
 
+public:
+
+    bool is_square() const {
+        return cols == rows;
+    }
+
+    int ncols() const { return cols; }
+    int nrows() const { return rows; }
+
+    using ElemPtr = float*;
+
+    std::tuple<ElemPtr, int, int> max_submatrix_element(const int curr_index) const{
+        assert(this->is_square());
+
+        auto res = std::make_tuple(&(arr[curr_index][curr_index]), curr_index, curr_index);
+        for (int i = curr_index; i < cols; ++i)
+            for (int j = curr_index; j < cols; ++j)
+                if (fabs(arr[i][j]) > fabs(*(std::get<0>(res)))) {
+                    std::get<0>(res) = &(arr[i][j]);
+                    std::get<1>(res) = i;
+                    std::get<2>(res) = j;
+                }
+
+        return res;
+    }
+
+    void swap_rows(const int fst, const int snd) {
+        ProxyRow tmp = std::move(arr[fst]); //move ctor
+        arr[fst] = std::move(arr[snd]); //move assign
+        arr[snd] = std::move(tmp); //move assign
+    }
+
+    void swap_columns(const int fst, const int snd) {
+        for (int i = fst; i < rows; ++i) {
+            float tmp = arr[i][fst];
+            arr[i][fst] = arr[i][snd];
+            arr[i][snd] = tmp;
+        }
+    }
+
+    /*for (current = 0; current < N; ++current) {
+// max from (N - current)x(N - current) submatrix
+(max, col, row) = max_submatrix_element(M, current);
+swap_columns(M, current, col);
+swap_rows(M, current, row);
+pivot = element(M, current, current);
+if (pivot == 0)
+exit(-1); // elimination not possible
+eliminate(M, current, pivot);
+}
+
+    void eliminate(int curr_index) {
+        for (int i = )
+    }
+
+    void full_pivoting() {
+
+    }
+public:
+    float determ() {
+        int numofswaps = 0; //should fix
+        float res;
+
+        for (int i = 0; i < cols; ++i) {
+            ElemPtr pivot = max_submatrix_element(i);
+            if ((*pivot) == 0)
+                break;
+            swap_columns(i, pivot)
+            swap_rows(i, pivot)
+            eliminate(i)
+        }
+    }*/
+
+
     /*Quat operator-() const {
 return Quat{-x, -y, -z, -w};*/
 //}
 
-private:
-    /*using ElemPtr = float*;
-
-    ElemPtr max_submatrix_element(int curr_index) {
-        Elemptr res = arr[curr_index]
-        for (int i = curr_index; i < )
-            for (int j = curr_index, j < size)
-                if (fabs(arr[i][j]) > fabs([]))
-    }*/
-
-
 }; //class
 
-class Square_Matrix : public Matrix {
+inline void dump (std::ostream &os, const Matrix &matrix)
+{
+    auto n_cols = matrix.ncols();
+    auto n_rows = matrix.nrows();
 
-public:
-    //ctor
-    Square_Matrix(int size) : Matrix(size,size) {};
-    ~Square_Matrix() = default;
-
-    bool valid() const { return cols == rows; };
-
-    // "конструктор" для создания единичной матрицы
-    static Square_Matrix eye(int size) {
-        Square_Matrix m{size};
-        for (int i = 0; i < size; ++i)
-            m[i][i] = 1;
-        
-        return m;
+    for (int i = 0; i < n_rows; ++i) {
+        for (int j = 0; j < n_cols; ++j) {
+            os << matrix[i][j] << " ";
+        }
+        os << std::endl;
     }
+}
 
-public:
+inline std::ostream& operator<< (std::ostream &os, const Matrix &matrix) {
+    dump(os, matrix);
+    return os;
+}
 
-}; //class
+inline void read(std::istream &is, Matrix &matrix) {
+    auto n_cols = matrix.ncols();
+    auto n_rows = matrix.nrows();
+
+    for (int i = 0; i < n_rows; ++i) {
+        for (int j = 0; j < n_cols; ++j) {
+            is >> matrix[i][j];
+        }
+    }
+}
+
+inline std::istream& operator>> (std::istream &is, Matrix &matrix) {
+    read(is, matrix);
+    return is;
+}
+
 } //namespace
