@@ -5,11 +5,12 @@
 #include <cstdlib>
 #include <cmath>
 #include <tuple>
+#include "floatcompar.hpp"
 
-//float elems, exceptions
-//float comparator
+//exceptions
 //size is int
 
+namespace yLab {
 namespace Matrix {
 
 class Matrix final {
@@ -154,8 +155,7 @@ private:
             float index = arr[k][curr_index] / arr[curr_index][curr_index];
             for (int m = curr_index; m < cols; ++m)
                 arr[k][m] -= index * arr[curr_index][m];
-        }
-        
+        }       
     }
 
 public:
@@ -166,7 +166,7 @@ public:
         int numofswaps = 0; 
         for (int i = 0; i < rows; ++i) {
             auto el = max_submatrix_element(i);
-            if (*(std::get<0>(el)) == 0)
+            if (cmp::is_zero(*(std::get<0>(el))))
                 return 0;
             numofswaps += swap_rows(i, std::get<1>(el));
             numofswaps += swap_columns(i, std::get<2>(el));
@@ -219,4 +219,5 @@ inline std::istream& operator>> (std::istream &is, Matrix &matrix) {
     return is;
 }
 
+} //namespace
 } //namespace

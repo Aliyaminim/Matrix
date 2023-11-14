@@ -1,8 +1,10 @@
 #include <iostream>
 #include "../include/matrix.hpp"
 
+using namespace yLab;
+
 int main() {
-    Matrix::Matrix m{2, 2};
+    Matrix::Matrix m{5, 5};
     Matrix::Matrix m1 = m;
 
     std::cin >> m;
