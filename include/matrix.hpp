@@ -13,7 +13,7 @@
 namespace Matrix {
 
 class Matrix {
-private:
+protected:
     int cols, rows;
 
     struct ProxyRow {
@@ -35,16 +35,6 @@ public:
             for (int j = 0; j < cols_; ++j) 
                 arr[i][j] = val;
         }
-    }
-
-    // "конструктор" для создания единичной матрицы
-    static Matrix eye(int cols_, int rows_) {
-        assert((cols_ == rows_) && "eye matrix is quadratic");
-        Matrix m{cols_, rows_};
-        for (int i = 0; i < rows_; ++i)
-            m[i][i] = 1;
-        
-        return m;
     }
 
 public: //big five
@@ -112,6 +102,10 @@ public: //operators' overloading
         return arr[n];
     }
 
+    /*Quat operator-() const {
+return Quat{-x, -y, -z, -w};*/
+//}
+
 private:
     /*using ElemPtr = float*;
 
@@ -122,6 +116,28 @@ private:
                 if (fabs(arr[i][j]) > fabs([]))
     }*/
 
+
+}; //class
+
+class Square_Matrix : public Matrix {
+
+public:
+    //ctor
+    Square_Matrix(int size) : Matrix(size,size) {};
+    ~Square_Matrix() = default;
+
+    bool valid() const { return cols == rows; };
+
+    // "конструктор" для создания единичной матрицы
+    static Square_Matrix eye(int size) {
+        Square_Matrix m{size};
+        for (int i = 0; i < size; ++i)
+            m[i][i] = 1;
+        
+        return m;
+    }
+
+public:
 
 }; //class
 } //namespace
