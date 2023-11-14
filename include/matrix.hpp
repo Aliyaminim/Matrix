@@ -8,9 +8,7 @@
 
 //float elems, exceptions
 //float comparator
-
 //size is int
-//может отнаследоваться как частный случай в квадратную матрицу нет кринж
 
 namespace Matrix {
 
@@ -103,23 +101,18 @@ public: //big five
     }
 
 public: //operators' overloading
+    const ProxyRow& operator[](int n) const { return arr[n]; }
+    ProxyRow& operator[](int n) { return arr[n]; }
 
-    const ProxyRow& operator[](int n) const {
-        return arr[n];
-    }
+public: //селекторы
+    int ncols() const { return cols; }
+    int nrows() const { return rows; }
 
-    ProxyRow& operator[](int n) {
-        return arr[n];
-    }
-
-public:
+private:
 
     bool is_square() const {
         return cols == rows;
     }
-
-    int ncols() const { return cols; }
-    int nrows() const { return rows; }
 
     using ElemPtr = float*;
 
@@ -138,58 +131,58 @@ public:
         return res;
     }
 
-    void swap_rows(const int fst, const int snd) {
+    int swap_rows(const int fst, const int snd) {
+        if (fst == snd) return 0;
         ProxyRow tmp = std::move(arr[fst]); //move ctor
         arr[fst] = std::move(arr[snd]); //move assign
         arr[snd] = std::move(tmp); //move assign
+        return 1;
     }
 
-    void swap_columns(const int fst, const int snd) {
+    int swap_columns(const int fst, const int snd) {
+        if (fst == snd) return 0;
         for (int i = fst; i < rows; ++i) {
             float tmp = arr[i][fst];
             arr[i][fst] = arr[i][snd];
             arr[i][snd] = tmp;
         }
+        return 1;
     }
-
-    /*for (current = 0; current < N; ++current) {
-// max from (N - current)x(N - current) submatrix
-(max, col, row) = max_submatrix_element(M, current);
-swap_columns(M, current, col);
-swap_rows(M, current, row);
-pivot = element(M, current, current);
-if (pivot == 0)
-exit(-1); // elimination not possible
-eliminate(M, current, pivot);
-}
 
     void eliminate(int curr_index) {
-        for (int i = )
-    }
-
-    void full_pivoting() {
-
-    }
-public:
-    float determ() {
-        int numofswaps = 0; //should fix
-        float res;
-
-        for (int i = 0; i < cols; ++i) {
-            ElemPtr pivot = max_submatrix_element(i);
-            if ((*pivot) == 0)
-                break;
-            swap_columns(i, pivot)
-            swap_rows(i, pivot)
-            eliminate(i)
+        for (int k = curr_index + 1; k < rows; ++k) {
+            float index = arr[k][curr_index] / arr[curr_index][curr_index];
+            for (int m = curr_index; m < cols; ++m)
+                arr[k][m] -= index * arr[curr_index][m];
         }
-    }*/
+        
+    }
 
+public:
 
-    /*Quat operator-() const {
-return Quat{-x, -y, -z, -w};*/
-//}
+    float determ() {
+        assert(this->is_square());
 
+        int numofswaps = 0; 
+        for (int i = 0; i < rows; ++i) {
+            auto el = max_submatrix_element(i);
+            if (*(std::get<0>(el)) == 0)
+                return 0;
+            numofswaps += swap_rows(i, std::get<1>(el));
+            numofswaps += swap_columns(i, std::get<2>(el));
+            
+            eliminate(i);
+        }
+
+        float res = 1;
+        for (int i = 0; i < rows; ++i)
+            res *= arr[i][i];
+        
+        if (numofswaps % 2 == 1)
+            res *= -1;
+        
+        return res;      
+    }
 }; //class
 
 inline void dump (std::ostream &os, const Matrix &matrix)

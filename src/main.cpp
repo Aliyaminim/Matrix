@@ -6,8 +6,8 @@ int main() {
     Matrix::Matrix m1 = m;
 
     std::cin >> m;
-    auto p = m.max_submatrix_element(0);
+    //auto p = m.max_submatrix_element(0);
 
-    std::cout << *(std::get<0>(p)) << "\n" << m << std::endl;
+    std::cout << m.determ() << "\n" << m << std::endl;
     return 0;
 }
