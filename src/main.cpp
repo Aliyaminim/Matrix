@@ -4,12 +4,13 @@
 using namespace yLab;
 
 int main() {
-    Matrix::Matrix m{5, 5};
-    Matrix::Matrix m1 = m;
+    int size;
+    std::cin >> size;
+    assert(std::cin.good());
+
+    Matrix::Matrix m{size, size};
 
     std::cin >> m;
-    //auto p = m.max_submatrix_element(0);
-
     std::cout << m.determ() << "\n" << m << std::endl;
     return 0;
 }

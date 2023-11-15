@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <tuple>
-#include "floatcompar.hpp"
+#include "doublecomp.hpp"
 
 //exceptions
 //size is int
@@ -18,19 +18,19 @@ protected:
     int cols, rows;
 
     struct ProxyRow {
-        float *row;
+        double *row;
         //constructor
-        ProxyRow(int cols_): row(new float[cols_]){};
+        ProxyRow(int cols_): row(new double[cols_]){};
         ProxyRow() = default;
-        const float& operator[](int n) const { return row[n]; }
-        float& operator[](int n) { return row[n]; }
+        const double& operator[](int n) const { return row[n]; }
+        double& operator[](int n) { return row[n]; }
     };
 
     ProxyRow* arr;
 
 public:
     // конструктор для создания матрицы, заполненной значением
-    Matrix(int cols_, int rows_, float val = 0) : cols(cols_), rows(rows_), arr(new ProxyRow[rows_]) {
+    Matrix(int cols_, int rows_, double val = 0) : cols(cols_), rows(rows_), arr(new ProxyRow[rows_]) {
         for (int i = 0; i < rows_; ++i) {
             arr[i] = ProxyRow{cols_};
             for (int j = 0; j < cols_; ++j) 
@@ -115,7 +115,7 @@ private:
         return cols == rows;
     }
 
-    using ElemPtr = float*;
+    using ElemPtr = double*;
 
     std::tuple<ElemPtr, int, int> max_submatrix_element(const int curr_index) const{
         assert(this->is_square());
@@ -123,7 +123,7 @@ private:
         auto res = std::make_tuple(&(arr[curr_index][curr_index]), curr_index, curr_index);
         for (int i = curr_index; i < cols; ++i)
             for (int j = curr_index; j < cols; ++j)
-                if (fabs(arr[i][j]) > fabs(*(std::get<0>(res)))) {
+                if (cmp::greater(fabs(arr[i][j]), fabs(*(std::get<0>(res))))) {
                     std::get<0>(res) = &(arr[i][j]);
                     std::get<1>(res) = i;
                     std::get<2>(res) = j;
@@ -143,7 +143,7 @@ private:
     int swap_columns(const int fst, const int snd) {
         if (fst == snd) return 0;
         for (int i = fst; i < rows; ++i) {
-            float tmp = arr[i][fst];
+            double tmp = arr[i][fst];
             arr[i][fst] = arr[i][snd];
             arr[i][snd] = tmp;
         }
@@ -152,7 +152,7 @@ private:
 
     void eliminate(int curr_index) {
         for (int k = curr_index + 1; k < rows; ++k) {
-            float index = arr[k][curr_index] / arr[curr_index][curr_index];
+            double index = arr[k][curr_index] / arr[curr_index][curr_index];
             for (int m = curr_index; m < cols; ++m)
                 arr[k][m] -= index * arr[curr_index][m];
         }       
@@ -160,7 +160,7 @@ private:
 
 public:
 
-    float determ() {
+    double determ() {
         assert(this->is_square());
 
         int numofswaps = 0; 
@@ -174,7 +174,7 @@ public:
             eliminate(i);
         }
 
-        float res = 1;
+        double res = 1;
         for (int i = 0; i < rows; ++i)
             res *= arr[i][i];
         
