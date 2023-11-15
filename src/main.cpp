@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/matrix.hpp"
+#include "matrix.hpp"
 
 using namespace yLab;
 

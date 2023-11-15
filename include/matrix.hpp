@@ -7,9 +7,6 @@
 #include <tuple>
 #include "doublecomp.hpp"
 
-//exceptions
-//size is int
-
 namespace yLab {
 namespace Matrix {
 
