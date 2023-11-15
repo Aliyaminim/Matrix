@@ -5,4 +5,5 @@ cmake ..
 #cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 cd ..
-./build/main < ./test/e2e/test1.in
+cd test
+bash testing.sh
