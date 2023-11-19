@@ -11,7 +11,7 @@ namespace yLab {
 namespace Matrix {
 
 class Matrix final {
-protected:
+private:
     int cols, rows;
 
     struct ProxyRow {
@@ -106,7 +106,7 @@ public: //селекторы
     int ncols() const { return cols; }
     int nrows() const { return rows; }
 
-private:
+public:
 
     bool is_square() const {
         return cols == rows;

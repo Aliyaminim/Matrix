@@ -17,9 +17,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-#find_package(GTest REQUIRED)
-#enable_testing()
-#add_subdirectory(test)
+find_package(GTest REQUIRED)
+enable_testing()
+add_subdirectory(test)
 
 add_executable(main ./src/main.cpp)
 target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}/include)
