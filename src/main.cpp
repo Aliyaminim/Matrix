@@ -14,11 +14,13 @@ int main() {
     std::cin >> m;
     double det = m.determ();
 
-    int right_det;
+    double right_det;
     std::cin >> right_det;
     assert(std::cin.good());
 
     if (cmp::equal(right_det, det))
         std::cout << det << " : OK" << std::endl;
+    else 
+        std::cout << det << " : FAIL " << right_det << std::endl;
     return 0;
 }
