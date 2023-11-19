@@ -5,5 +5,3 @@ cmake ..
 #cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 cd ..
-cd test
-bash testing.sh
