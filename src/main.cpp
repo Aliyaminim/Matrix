@@ -1,5 +1,5 @@
 #include <iostream>
-#include "matrix.hpp"
+#include "Matrix.hpp"
 #include "doublecomp.hpp"
 
 using namespace yLab;
@@ -9,7 +9,7 @@ int main() {
     std::cin >> size;
     assert(std::cin.good());
 
-    Matrix::Matrix m{size, size};
+    Matrix::Matrix<double> m{size, size};
 
     std::cin >> m;
     double det = m.determ();

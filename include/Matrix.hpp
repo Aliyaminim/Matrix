@@ -1,6 +1,13 @@
+#pragma once
+
 #include <iostream>
 #include <new>
 #include <algorithm>
+#include <cassert>
+#include <cstdlib>
+#include <cmath>
+#include <tuple>
+#include "doublecomp.hpp"
 
 namespace yLab {
 namespace Matrix {
@@ -84,7 +91,7 @@ protected:
 
     ~MatrixBuf() {
         destroy(arr, arr + rows);
-        delete arr;
+        ::operator delete (arr);
     }
 };
 
@@ -95,7 +102,11 @@ template<typename T> class Matrix : private MatrixBuf<T> {
 
 public:
 
-    explicit Matrix(int rows_ = 0, int cols_ = 0) : MatrixBuf<T>(rows_, cols_) {}
+    explicit Matrix(int rows_ = 0, int cols_ = 0, T val = T{}) : MatrixBuf<T>(rows_, cols_) {
+        for (int i = 0; i < rows_; ++i) 
+        for (int j = 0; j < cols_; ++j) 
+            arr[i][j] = val;
+    }
 
     Matrix(Matrix &&rhs) noexcept : MatrixBuf<T>(rhs) {}
 
@@ -119,10 +130,124 @@ public: //operators' overloading
     const ProxyRow<T>& operator[](int n) const { return arr[n]; }
     ProxyRow<T>& operator[](int n) { return arr[n]; }
 
-public: //селекторы
+public: 
     int ncols() const { return cols; }
     int nrows() const { return rows; }
 
+    bool is_square() const {
+        return cols == rows;
+    }
+
+    using ElemPtr = T*;
+
+    std::tuple<ElemPtr, int, int> max_submatrix_element(const int curr_idx) const{
+        assert(this->is_square());
+        //AAAAAAAAAAAAa
+
+        auto res = std::make_tuple(&(arr[curr_idx][curr_idx]), curr_idx, curr_idx);
+        for (int i = curr_idx; i < cols; ++i)
+            for (int j = curr_idx; j < cols; ++j)
+                if (cmp::greater(fabs(arr[i][j]), fabs(*(std::get<0>(res))))) {
+                    std::get<0>(res) = &(arr[i][j]);
+                    std::get<1>(res) = i;
+                    std::get<2>(res) = j;
+                }
+
+        return res;
+    }
+
+    int swap_rows(const int fst, const int snd) noexcept {
+        if (fst == snd) return 0;
+        ProxyRow tmp = std::move(arr[fst]); //move ctor
+        arr[fst] = std::move(arr[snd]); //move assign
+        arr[snd] = std::move(tmp); //move assign
+        return 1;
+    }
+
+    int swap_columns(const int fst, const int snd) {
+        if (fst == snd) return 0;
+        for (int i = fst; i < rows; ++i) {
+            //AAAAAAAAAAAAA
+            T tmp = arr[i][fst];
+            arr[i][fst] = arr[i][snd];
+            arr[i][snd] = tmp;
+        }
+        return 1;
+    }
+
+    void eliminate(int curr_idx) {
+        for (int k = curr_idx + 1; k < rows; ++k) {
+            T index = arr[k][curr_idx] / arr[curr_idx][curr_idx];
+            for (int m = curr_idx; m < cols; ++m)
+                arr[k][m] -= index * arr[curr_idx][m];
+        }       
+    }
+
+    double determ() {
+        //AAAAAAAAAAAAAa
+        assert(this->is_square());
+
+        int numofswaps = 0; 
+        for (int i = 0; i < rows; ++i) {
+            auto el = max_submatrix_element(i);
+            if (cmp::is_zero(*(std::get<0>(el))))
+                return 0;
+            numofswaps += swap_rows(i, std::get<1>(el));
+            numofswaps += swap_columns(i, std::get<2>(el));
+            
+            eliminate(i);
+        }
+
+        double res = 1;
+        for (int i = 0; i < rows; ++i)
+            res *= arr[i][i];
+        
+        if (numofswaps % 2 == 1)
+            res *= -1;
+        
+        return res;      
+    }
+
+
 }; //class
+
+template<typename T>
+inline void dump (std::ostream &os, const Matrix<T> &matrix)
+{
+    auto n_cols = matrix.ncols();
+    auto n_rows = matrix.nrows();
+
+    for (int i = 0; i < n_rows; ++i) {
+        for (int j = 0; j < n_cols; ++j) {
+            os << matrix[i][j] << " ";
+        }
+        os << std::endl;
+    }
+}
+
+template<typename T>
+inline std::ostream& operator<< (std::ostream &os, const Matrix<T> &matrix) {
+    dump(os, matrix);
+    return os;
+}
+
+template<typename T>
+inline void read(std::istream &is, Matrix<T> &matrix) {
+    auto n_cols = matrix.ncols();
+    auto n_rows = matrix.nrows();
+
+    for (int i = 0; i < n_rows; ++i) {
+        for (int j = 0; j < n_cols; ++j) {
+            is >> matrix[i][j];
+        }
+    }
+}
+
+template<typename T>
+inline std::istream& operator>> (std::istream &is, Matrix<T> &matrix) {
+    read(is, matrix);
+    return is;
+}
+
 } //namespaces
 }

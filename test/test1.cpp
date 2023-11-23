@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
-#include "matrix.hpp"
+#include "Matrix.hpp"
 #include <iostream>
 #include <random>
 
 using namespace yLab;
 
 TEST(Test_swap, test1) {
-    Matrix::Matrix m{10, 10, 8};
+    Matrix::Matrix<double> m{10, 10, 8};
     m[7][8] = 3;
     m.swap_columns(0, 8);
     m.swap_rows(0, 7);
@@ -14,7 +14,7 @@ TEST(Test_swap, test1) {
 }
 
 TEST(Test_swap, test2) {
-    Matrix::Matrix m{20, 20, 8};
+    Matrix::Matrix<double> m{20, 20, 8};
     m[0][0] = 3;
     m.swap_columns(0, 0);
     m.swap_rows(0, 0);
@@ -22,7 +22,7 @@ TEST(Test_swap, test2) {
 }
 
 TEST(Max_Submatrix_Element, test1) {
-    Matrix::Matrix m{500, 500};
+    Matrix::Matrix<double> m{500, 500};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution_int(-20, 80);
@@ -43,7 +43,7 @@ TEST(Max_Submatrix_Element, test1) {
 }
 
 TEST(Max_Submatrix_Element, test2) {
-    Matrix::Matrix m{600, 600};
+    Matrix::Matrix<double> m{600, 600};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution_int(-20, 90);
@@ -60,7 +60,7 @@ TEST(Max_Submatrix_Element, test2) {
 }
 
 TEST(Test_eliminate, test1) {
-    Matrix::Matrix m{600, 600};
+    Matrix::Matrix<double> m{600, 600};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution_int(-10, 10);
