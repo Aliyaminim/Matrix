@@ -10,7 +10,7 @@
 namespace yLab {
 namespace Matrix {
 
-class Matrix final {
+class Matrixx final {
 private:
     int cols, rows;
 
