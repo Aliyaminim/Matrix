@@ -9,10 +9,14 @@
 #include <tuple>
 #include "doublecomp.hpp"
 
-namespace yLab {
+namespace yLab { 
 namespace Matrix {
 
-//размещающий new
+struct undefined_det : public std::runtime_error {
+    undefined_det(const char *message = "Determinant is not defined for non-square matrices")
+              : std::runtime_error{message} {};
+};
+
 template <typename T> void construct(T *p, const T &rhs) { new (p) T(rhs); }
 template <typename T> void construct(T *p, T &&rhs) {
     new (p) T(std::move(rhs));
@@ -141,8 +145,8 @@ public:
     using ElemPtr = T*;
 
     std::tuple<ElemPtr, int, int> max_submatrix_element(const int curr_idx) const{
-        assert(this->is_square());
-        //AAAAAAAAAAAAa
+        if (!is_square())
+            throw undefined_det{};
 
         auto res = std::make_tuple(&(arr[curr_idx][curr_idx]), curr_idx, curr_idx);
         for (int i = curr_idx; i < cols; ++i)
@@ -167,10 +171,9 @@ public:
     int swap_columns(const int fst, const int snd) {
         if (fst == snd) return 0;
         for (int i = fst; i < rows; ++i) {
-            //AAAAAAAAAAAAA
-            T tmp = arr[i][fst];
-            arr[i][fst] = arr[i][snd];
-            arr[i][snd] = tmp;
+            T tmp = std::move(arr[i][fst]);
+            arr[i][fst] = std::move(arr[i][snd]);
+            arr[i][snd] = std::move(tmp);
         }
         return 1;
     }
@@ -184,8 +187,8 @@ public:
     }
 
     double determ() {
-        //AAAAAAAAAAAAAa
-        assert(this->is_square());
+        if (!is_square())
+            throw undefined_det{};
 
         int numofswaps = 0; 
         for (int i = 0; i < rows; ++i) {
