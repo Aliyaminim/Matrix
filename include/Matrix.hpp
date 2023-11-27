@@ -99,7 +99,7 @@ protected:
     }
 };
 
-template<typename T> class Matrix : private MatrixBuf<T> {
+template<typename T> class Matrix final : private MatrixBuf<T> {
     using MatrixBuf<T>::arr;
     using MatrixBuf<T>::rows;
     using MatrixBuf<T>::cols;
