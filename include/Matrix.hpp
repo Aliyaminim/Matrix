@@ -32,8 +32,7 @@ template<typename T> class ProxyRow{
     T* row;
     int cols;
 public:
-    explicit ProxyRow(int cols_ = 0) : row(new T[cols_]), cols(cols_) {} //may throw bad_alloc
-
+    explicit ProxyRow(int cols_ = 0) : row(static_cast<T*>(::operator new(sizeof(T)*cols_))), cols(cols_) {} //may throw bad_alloc
     ProxyRow(const ProxyRow &rhs) = delete;
     ProxyRow &operator=(const ProxyRow &rhs) = delete;
 
