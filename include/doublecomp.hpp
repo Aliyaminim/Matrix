@@ -3,7 +3,7 @@
 namespace yLab {
 namespace cmp {
 
-static double flt_tolerance = 0.000001;
+static double flt_tolerance = 1e-10;
 
 //(a < b) return 1, (a == b) return 0, (a > b) return -1; using relative epsilon comparison
 inline int double_comparator(double a, double b) {

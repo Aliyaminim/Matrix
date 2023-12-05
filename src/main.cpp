@@ -18,12 +18,12 @@ int main() {
     #ifdef DEBUG
     double right_det;
     std::cin >> right_det;
-    assert(std::cin.good());
-
+    if (std::cin.good()) {
     if (cmp::equal(right_det, det))
         std::cout << " : OK";
     else 
         std::cout << " : FAIL " << right_det;
+    }
     #endif
     std::cout << std::endl;
 

@@ -148,11 +148,10 @@ public:
             throw undefined_det{};
 
         auto res = std::make_tuple(&(arr[curr_idx][curr_idx]), curr_idx, curr_idx);
-        for (int i = curr_idx; i < cols; ++i)
-            for (int j = curr_idx; j < cols; ++j)
-                if (cmp::greater(fabs(arr[i][j]), fabs(*(std::get<0>(res))))) {
-                    std::get<0>(res) = &(arr[i][j]);
-                    std::get<1>(res) = i;
+        for (int j = curr_idx; j < cols; ++j)
+                if (cmp::greater(fabs(arr[curr_idx][j]), fabs(*(std::get<0>(res))))) {
+                    std::get<0>(res) = &(arr[curr_idx][j]);
+                    std::get<1>(res) = curr_idx;
                     std::get<2>(res) = j;
                 }
 
@@ -192,8 +191,10 @@ public:
         int numofswaps = 0; 
         for (int i = 0; i < rows; ++i) {
             auto el = max_submatrix_element(i);
-            if (cmp::is_zero(*(std::get<0>(el))))
-                return 0;
+            auto pivot = *(std::get<0>(el));
+            if (pivot == T{})
+                return pivot;
+    
             numofswaps += swap_rows(i, std::get<1>(el));
             numofswaps += swap_columns(i, std::get<2>(el));
             
@@ -203,6 +204,9 @@ public:
         double res = 1;
         for (int i = 0; i < rows; ++i)
             res *= arr[i][i];
+        
+        if (cmp::is_zero(res))  
+            res = 0.0;
         
         if (numofswaps % 2 == 1)
             res *= -1;
