@@ -51,8 +51,8 @@ public:
         delete [] row;
     }
 
-    const double& operator[](int n) const { return row[n]; }
-    double& operator[](int n) { return row[n]; }
+    const T& operator[](int n) const { return row[n]; }
+    T& operator[](int n) { return row[n]; }
 };
 
 template<typename T> class MatrixBuf {
