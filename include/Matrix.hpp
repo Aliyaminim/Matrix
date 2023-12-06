@@ -23,41 +23,22 @@ template <typename T> void construct(T *p, T &&rhs) {
 }
 
 template <class S> void destroy(S *p) { p->~S(); }
-template <typename FwdPtr> void destroy(FwdPtr first, FwdPtr last) {
+template <typename FwdIter> void destroy(FwdIter first, FwdIter last) {
     while (first != last) 
         destroy(first++);
 }    
 
-template<typename T> class ProxyRow{
+template<typename T> class Proxy_Row {
     T* row;
-    int cols;
 public:
-    explicit ProxyRow(int cols_ = 0) : row(static_cast<T*>(::operator new(sizeof(T)*cols_))), cols(cols_) {} //may throw bad_alloc
-    ProxyRow(const ProxyRow &rhs) = delete;
-    ProxyRow &operator=(const ProxyRow &rhs) = delete;
-
-    ProxyRow(ProxyRow &&rhs) noexcept : row(rhs.row), cols(rhs.cols) {
-        rhs.row = nullptr;
-        rhs.cols = 0;
-    }
-
-    ProxyRow &operator=(ProxyRow &&rhs) noexcept {
-        std::swap(row, rhs.row);
-        std::swap(cols, rhs.cols);
-        return *this;
-    }
-
-    ~ProxyRow() {
-        delete [] row;
-    }
-
-    const T& operator[](int n) const { return row[n]; }
-    T& operator[](int n) { return row[n]; }
+    explicit Proxy_Row(T* def_ptr): row(def_ptr){}
+    const T &operator[] (int j) const { return row[j]; }
+    T &operator[] (int j)  { return row[j]; }
 };
 
 template<typename T> class MatrixBuf {
 protected:
-    ProxyRow<T>* arr = nullptr;
+    T* arr = nullptr;
     int rows = 0; 
     int cols = 0;
 protected: 
@@ -78,12 +59,9 @@ protected:
     }
 
     explicit MatrixBuf(int rows_ = 0, int cols_ = 0) 
-        : arr(((rows_ != 0) && (cols_ != 0)) ? static_cast<ProxyRow<T>*>(::operator new(sizeof(ProxyRow<T>)*rows_)) : nullptr)
+        : arr(((rows_ != 0) && (cols_ != 0)) ? static_cast<T*>(::operator new(sizeof(T)*rows_*cols_)) : nullptr)
     {
         if ((rows_ != 0) && (cols_ != 0)) {
-            for (int i = 0; i < rows_; ++i) 
-                arr[i] = ProxyRow<T>{cols_};
-            
             rows = rows_;
             cols = cols_;
         } else {
@@ -106,9 +84,8 @@ template<typename T> class Matrix final : private MatrixBuf<T> {
 public:
 
     explicit Matrix(int rows_ = 0, int cols_ = 0, T val = T{}) : MatrixBuf<T>(rows_, cols_) {
-        for (int i = 0; i < rows_; ++i) 
-        for (int j = 0; j < cols_; ++j) 
-            arr[i][j] = val;
+
+        std::fill (arr, arr + rows_*cols_, val);
     }
 
     Matrix(Matrix &&rhs) noexcept : MatrixBuf<T>(rhs) {}
@@ -118,7 +95,7 @@ public:
     Matrix(const Matrix &rhs) : MatrixBuf<T>(rhs.rows, rhs.cols) {
         for (int i = 0; i < rows; ++i) 
         for (int j = 0; j < cols; ++j) 
-            arr[i][j] = rhs[i][j]; 
+            construct(arr + cols*i + j, rhs[i][j]);
     }
 
     Matrix &operator=(const Matrix &rhs) {
@@ -130,8 +107,18 @@ public:
     ~Matrix() = default;
 
 public: //operators' overloading
-    const ProxyRow<T>& operator[](int n) const { return arr[n]; }
-    ProxyRow<T>& operator[](int n) { return arr[n]; }
+    //const ProxyRow<T>& operator[](int n) const { return arr[n]; }
+    //ProxyRow<T>& operator[](int n) { return arr[n]; }
+
+    const Proxy_Row<T> operator[] (int row_i) const
+    {
+        return Proxy_Row<T>{arr + row_i * cols};
+    }
+
+    Proxy_Row<T> operator[] (int row_i)
+    {
+        return Proxy_Row<T>{arr + row_i * cols};
+    }
 
 public: 
     int ncols() const { return cols; }
@@ -142,15 +129,16 @@ public:
     }
 
     using ElemPtr = T*;
+    using const_ElemPtr = const T*;
 
-    std::tuple<ElemPtr, int, int> max_submatrix_element(const int curr_idx) const{
+    std::tuple<const_ElemPtr, int, int> max_submatrix_element(const int curr_idx) const{
         if (!is_square())
             throw undefined_det{};
 
-        auto res = std::make_tuple(&(arr[curr_idx][curr_idx]), curr_idx, curr_idx);
+        auto res = std::make_tuple(&((*this)[curr_idx][curr_idx]), curr_idx, curr_idx);
         for (int j = curr_idx; j < cols; ++j)
-                if (cmp::greater(fabs(arr[curr_idx][j]), fabs(*(std::get<0>(res))))) {
-                    std::get<0>(res) = &(arr[curr_idx][j]);
+                if (cmp::greater(fabs((*this)[curr_idx][j]), fabs(*(std::get<0>(res))))) {
+                    std::get<0>(res) = &((*this)[curr_idx][j]);
                     std::get<1>(res) = curr_idx;
                     std::get<2>(res) = j;
                 }
@@ -158,29 +146,29 @@ public:
         return res;
     }
 
+//
     int swap_rows(const int fst, const int snd) noexcept {
         if (fst == snd) return 0;
-        ProxyRow tmp = std::move(arr[fst]); //move ctor
-        arr[fst] = std::move(arr[snd]); //move assign
-        arr[snd] = std::move(tmp); //move assign
+        std::swap_ranges(arr + fst*cols, arr + (fst+1)*cols, arr + snd*cols);
         return 1;
     }
 
+
     int swap_columns(const int fst, const int snd) {
         if (fst == snd) return 0;
-        for (int i = fst; i < rows; ++i) {
+        /*for (int i = fst; i < rows; ++i) {
             T tmp = std::move(arr[i][fst]);
             arr[i][fst] = std::move(arr[i][snd]);
             arr[i][snd] = std::move(tmp);
-        }
+        }*/
         return 1;
     }
 
     void eliminate(int curr_idx) {
         for (int k = curr_idx + 1; k < rows; ++k) {
-            T index = arr[k][curr_idx] / arr[curr_idx][curr_idx];
+            T index = (*this)[k][curr_idx] / (*this)[curr_idx][curr_idx];
             for (int m = curr_idx; m < cols; ++m)
-                arr[k][m] -= index * arr[curr_idx][m];
+                (*this)[k][m] -= index * (*this)[curr_idx][m];
         }       
     }
 
@@ -203,7 +191,7 @@ public:
 
         double res = 1;
         for (int i = 0; i < rows; ++i)
-            res *= arr[i][i];
+            res *= (*this)[i][i];
         
         if (cmp::is_zero(res))  
             res = 0.0;

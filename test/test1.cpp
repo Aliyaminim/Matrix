@@ -21,6 +21,37 @@ TEST(Test_swap, test2) {
     ASSERT_TRUE(m[0][0] == 3);
 }
 
+TEST(Test_ctor, test3) {
+    Matrix::Matrix<double> m{20, 20, 8};
+    m[0][0] = 3;
+    m.swap_columns(0, 0);
+    m.swap_rows(0, 0);
+    ASSERT_TRUE(m[0][0] == 3);
+}
+
+
+
+TEST(Test_ctor, copy_ctor) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distribution_int(-20, 80);
+
+    int size = 10;
+    Matrix::Matrix<int> m1{size, size};
+    for(int i = 0; i < size; ++i)
+        for (int j = 0; j < size; ++j) {
+            m1[i][j] = distribution_int(gen);
+        }
+    
+    Matrix::Matrix<int> m2 = m1;
+
+    for(int i = 0; i < size; ++i)
+        for (int j = 0; j < size; ++j) {
+            ASSERT_TRUE(m1[i][j] == m2[i][j]);
+        }
+}
+
+
 TEST(Max_Submatrix_Element, test1) {
     Matrix::Matrix<double> m{500, 500};
     std::random_device rd;
