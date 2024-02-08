@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <cmath>
 #include <tuple>
+#include <concepts>
+#include <type_traits>
 #include "doublecomp.hpp"
 
 namespace yLab { 
@@ -100,6 +102,7 @@ public:
 
     Matrix &operator=(const Matrix &rhs) {
         Matrix tmp(rhs);
+        //kalb line
         std::swap(*this, tmp);
         return *this;
     }
@@ -146,7 +149,6 @@ public:
         return res;
     }
 
-//
     int swap_rows(const int fst, const int snd) noexcept {
         if (fst == snd) return 0;
         std::swap_ranges(arr + fst*cols, arr + (fst+1)*cols, arr + snd*cols);
@@ -156,11 +158,11 @@ public:
 
     int swap_columns(const int fst, const int snd) {
         if (fst == snd) return 0;
-        /*for (int i = fst; i < rows; ++i) {
-            T tmp = std::move(arr[i][fst]);
-            arr[i][fst] = std::move(arr[i][snd]);
-            arr[i][snd] = std::move(tmp);
-        }*/
+        for (int i = 0; i < rows; ++i) {
+            T tmp = std::move((*this)[i][fst]);
+            (*this)[i][fst] = std::move((*this)[i][snd]);
+            (*this)[i][snd] = std::move(tmp);
+        }
         return 1;
     }
 
@@ -172,7 +174,8 @@ public:
         }       
     }
 
-    double determ() {
+    // Gauss algorithm
+    double det_gauss() {
         if (!is_square())
             throw undefined_det{};
 
@@ -196,12 +199,61 @@ public:
         if (cmp::is_zero(res))  
             res = 0.0;
         
-        if (numofswaps % 2 == 1)
-            res *= -1;
-        
-        return res;      
+        return (numofswaps % 2 == 1) ? -res : res;      
     }
 
+    // Bareiss algorithm
+    double det_bareiss () { 
+        if (!is_square())
+            throw undefined_det{};
+        int numofswaps = 0;
+        for (int k = 0; k < cols - 1; k++) {
+            for (int m = k; m < rows; m++) {
+                if(!cmp::is_zero((*this)[m][k])) {
+                    numofswaps += swap_rows(m, k);
+                    break;
+                }
+                if(m == rows - 1)
+                    return 0.0;
+            }
+            
+            for (int i = k + 1; i < cols; i++) {
+            for (int j = k + 1; j < cols; j++) {
+                (*this)[i][j] = (*this)[k][k] * (*this)[i][j] - (*this)[i][k] * (*this)[k][j];
+                if(k != 0) {
+                    (*this)[i][j] /= (*this)[k-1][k-1];
+                }
+            }
+            }
+        }
+        double res = (*this)[rows-1][cols-1];
+        return (numofswaps % 2 == 1) ? -res : res;
+    }
+
+    void convert_to_double() {
+        for (int i = 0; i < rows; i++){
+        for (int j = 0; j < cols; j++){
+            (*this)[i][j] = static_cast<double>((*this)[i][j]);
+        }
+        }
+    }
+
+    double determ() {
+        if (!is_square())
+            throw undefined_det{};
+
+        if (std::unsigned_integral<T>) {
+            Matrix m = *this;
+            m.convert_to_double();
+            return m.det_gauss();
+        } else if (std::signed_integral<T>) {
+            Matrix m = *this;
+            return m.det_bareiss();
+        } else {
+            Matrix m = *this;
+            return m.det_gauss();
+        }
+    }
 
 }; //class
 

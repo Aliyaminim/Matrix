@@ -21,7 +21,9 @@ find_package(GTest REQUIRED)
 enable_testing()
 add_subdirectory(test)
 
-add_executable(main ./src/main.cpp)
-target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}/include)
+add_executable(maind ./src/main_double.cpp)
+target_include_directories(maind PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
+add_executable(maini ./src/main_int.cpp)
+target_include_directories(maini PUBLIC ${CMAKE_SOURCE_DIR}/include)
 #cmake -DCMAKE_BUILD_TYPE=Debug
