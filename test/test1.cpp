@@ -58,17 +58,17 @@ TEST(Max_Submatrix_Element, test1) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution_int(-20, 80);
 
-    int right_max = -11;
+    int right_max = -21;
     for(int i = 0; i < 500; ++i)
-        for (int j = 0; j < 500; ++j) {
+        for (int j = 0; j < 500; ++j) 
             m[i][j] = distribution_int(gen);
-        }
-    for(int i = 0; i < 500; ++i)
-    for(int j = 0; j < 500; ++j)
-        if (m[i][j] > right_max)
-            right_max = m[i][j];
+    
+    int sub_idx = 0;
+    for(int i = sub_idx; i < 500; ++i)
+        if (m[sub_idx][i] > right_max)
+            right_max = m[sub_idx][i];
 
-    auto tmp = m.max_submatrix_element(0);
+    auto tmp = m.max_submatrix_element(sub_idx);
     int res = *(std::get<0>(tmp));
     ASSERT_TRUE(right_max == res);
 }
@@ -79,14 +79,18 @@ TEST(Max_Submatrix_Element, test2) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution_int(-20, 90);
 
-    int right_max = -11;
+    int right_max = -21;
     for(int i = 0; i < 600; ++i)
         for (int j = 0; j < 600; ++j) {
             m[i][j] = distribution_int(gen);
-            if (m[i][j] > right_max)
-                right_max = m[i][j];
         }
-    auto tmp = m.max_submatrix_element(0);
+
+    int sub_idx = 104;
+    for(int i = sub_idx; i < 500; ++i)
+        if (m[sub_idx][i] > right_max)
+            right_max = m[sub_idx][i];
+
+    auto tmp = m.max_submatrix_element(sub_idx);
     ASSERT_TRUE(right_max == *(std::get<0>(tmp)));
 }
 
@@ -102,7 +106,7 @@ TEST(Test_eliminate, test1) {
         }
     m.eliminate(0);
 
-    //std::cout << m[5][0];
-    ASSERT_TRUE(cmp::is_zero(m[5][0]));
+    for (int i = 1; i < 600; ++i)
+        ASSERT_TRUE(cmp::is_zero(m[i][0]));
 }
 
