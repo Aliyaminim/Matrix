@@ -110,8 +110,6 @@ public:
     ~Matrix() = default;
 
 public: //operators' overloading
-    //const ProxyRow<T>& operator[](int n) const { return arr[n]; }
-    //ProxyRow<T>& operator[](int n) { return arr[n]; }
 
     const Proxy_Row<T> operator[] (int row_i) const
     {
@@ -132,22 +130,7 @@ public:
     }
 
     using ElemPtr = T*;
-    using const_ElemPtr = const T*;
-
-    std::tuple<const_ElemPtr, int, int> max_submatrix_element(const int curr_idx) const{
-        if (!is_square())
-            throw undefined_det{};
-
-        auto res = std::make_tuple(&((*this)[curr_idx][curr_idx]), curr_idx, curr_idx);
-        for (int j = curr_idx; j < cols; ++j)
-                if (cmp::greater(fabs((*this)[curr_idx][j]), fabs(*(std::get<0>(res))))) {
-                    std::get<0>(res) = &((*this)[curr_idx][j]);
-                    std::get<1>(res) = curr_idx;
-                    std::get<2>(res) = j;
-                }
-
-        return res;
-    }
+    using const_ElemPtr = const T*; 
 
     int swap_rows(const int fst, const int snd) noexcept {
         if (fst == snd) return 0;
@@ -208,34 +191,23 @@ public:
             throw undefined_det{};
         int numofswaps = 0;
         for (int k = 0; k < cols - 1; k++) {
-            for (int m = k; m < rows; m++) {
-                if(!cmp::is_zero((*this)[m][k])) {
-                    numofswaps += swap_rows(m, k);
-                    break;
+            auto [position, pivot] = find_pivot(k);
+            if (pivot == T{}) 
+                return pivot;
+            else {
+                numofswaps += swap_rows(k, position);
+                for (int i = k + 1; i < cols; i++) {
+                for (int j = k + 1; j < cols; j++) {
+                    (*this)[i][j] = (*this)[k][k] * (*this)[i][j] - (*this)[i][k] * (*this)[k][j];
+                    if(k != 0) {
+                        (*this)[i][j] /= (*this)[k-1][k-1];
+                    }
                 }
-                if(m == rows - 1)
-                    return 0.0;
-            }
-            
-            for (int i = k + 1; i < cols; i++) {
-            for (int j = k + 1; j < cols; j++) {
-                (*this)[i][j] = (*this)[k][k] * (*this)[i][j] - (*this)[i][k] * (*this)[k][j];
-                if(k != 0) {
-                    (*this)[i][j] /= (*this)[k-1][k-1];
                 }
-            }
             }
         }
         double res = (*this)[rows-1][cols-1];
         return (numofswaps % 2 == 1) ? -res : res;
-    }
-
-    void convert_to_double() {
-        for (int i = 0; i < rows; i++){
-        for (int j = 0; j < cols; j++){
-            (*this)[i][j] = static_cast<double>((*this)[i][j]);
-        }
-        }
     }
 
     double determ() {
@@ -252,6 +224,46 @@ public:
         } else {
             Matrix m = *this;
             return m.det_gauss();
+        }
+    }
+
+    std::tuple<const_ElemPtr, int, int> max_submatrix_element(const int curr_idx) const {
+        if (!is_square())
+            throw undefined_det{};
+
+        auto res = std::make_tuple(&((*this)[curr_idx][curr_idx]), curr_idx, curr_idx);
+        for (int j = curr_idx; j < cols; ++j)
+                if (cmp::greater(fabs((*this)[curr_idx][j]), fabs(*(std::get<0>(res))))) {
+                    std::get<0>(res) = &((*this)[curr_idx][j]);
+                    std::get<1>(res) = curr_idx;
+                    std::get<2>(res) = j;
+                }
+
+        return res;
+    }
+
+    std::pair<int, T> find_pivot (int curr_row) const {   
+        int col = curr_row;
+        std::pair<int, T> pivot {curr_row, (*this)[curr_row][col]};
+
+        for (int i = curr_row + 1; i < col; i++)
+        {
+            auto elem = (*this)[i][col];
+            if (std::abs (pivot.second) < std::abs (elem))
+            {
+                pivot.first  = i;
+                pivot.second = elem;
+            }
+        }
+
+        return pivot;
+    }
+
+    void convert_to_double() {
+        for (int i = 0; i < rows; i++){
+        for (int j = 0; j < cols; j++){
+            (*this)[i][j] = static_cast<double>((*this)[i][j]);
+        }
         }
     }
 

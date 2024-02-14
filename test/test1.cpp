@@ -29,8 +29,6 @@ TEST(Test_ctor, test3) {
     ASSERT_TRUE(m[0][0] == 3);
 }
 
-
-
 TEST(Test_ctor, copy_ctor) {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -50,7 +48,6 @@ TEST(Test_ctor, copy_ctor) {
             ASSERT_TRUE(m1[i][j] == m2[i][j]);
         }
 }
-
 
 TEST(Max_Submatrix_Element, test1) {
     Matrix::Matrix<double> m{500, 500};

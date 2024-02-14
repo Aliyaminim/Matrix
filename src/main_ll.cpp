@@ -9,7 +9,7 @@ int main() {
     std::cin >> size;
     assert(std::cin.good());
 
-    Matrix::Matrix<int> m{size, size};
+    Matrix::Matrix<long long> m{size, size};
 
     std::cin >> m;
     double det = m.determ();
