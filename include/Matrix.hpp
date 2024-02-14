@@ -267,6 +267,20 @@ public:
         }
     }
 
+public:
+
+    Matrix& transpose() & {
+        if (!is_square())
+            throw undefined_det{"Cannot transpose non-square matrix"};
+        for (int i = 0; i < cols; i++) {
+            for (int j = i + 1; j < cols; j++) {
+                T tmp = std::move((*this)[i][j]);
+                (*this)[i][j] = std::move((*this)[j][i]);
+                (*this)[j][i] = std::move(tmp);
+            }
+        }
+    }
+
 }; //class
 
 template<typename T>
