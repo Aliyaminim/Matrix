@@ -19,6 +19,11 @@ struct undefined_det : public std::runtime_error {
               : std::runtime_error{message} {};
 };
 
+struct undefined_product : public std::runtime_error {
+    undefined_product ()
+                  : std::runtime_error{"Product A*B of matrices does not exist, because A.cols != B.rows"} {};
+};
+
 template <typename T> void construct(T *p, const T &rhs) { new (p) T(rhs); }
 template <typename T> void construct(T *p, T &&rhs) {
     new (p) T(std::move(rhs));
@@ -286,6 +291,25 @@ public:
     }
 
 }; //class
+
+template<typename T>
+Matrix<T> product (const Matrix<T> &lhs, const Matrix<T> &rhs) {
+    if (lhs.ncols() != rhs.nrows())
+        throw undefined_product {};
+
+    Matrix<T> product{lhs.nrows(), rhs.ncols()};
+    int dim = lhs.ncols();
+
+    Matrix<T> rhs_copy = rhs;
+    rhs_copy.transpose();
+
+    for (int i = 0; i < lhs.nrows(); ++i)
+        for (int j = 0; j < rhs.ncols(); ++j)
+            for (int k = 0; k < dim; ++k)
+                product[i][j] += lhs[i][k] * rhs_copy[j][k];
+
+    return product;
+}
 
 template<typename T>
 inline void dump (std::ostream &os, const Matrix<T> &matrix)
