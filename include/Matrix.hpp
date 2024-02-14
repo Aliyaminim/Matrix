@@ -58,6 +58,8 @@ protected:
         std::swap(arr, rhs.arr);
         std::swap(rows, rhs.rows);
         std::swap(cols, rhs.cols);
+
+        return *this;
     }
 
     explicit MatrixBuf(int rows_ = 0, int cols_ = 0) 
@@ -90,7 +92,7 @@ public:
         std::fill (arr, arr + rows_*cols_, val);
     }
 
-    Matrix(Matrix &&rhs) noexcept : MatrixBuf<T>(rhs) {}
+    Matrix(Matrix &&rhs) noexcept = default;
 
     Matrix &operator=(Matrix &&rhs) = default;
 
@@ -246,7 +248,7 @@ public:
         int col = curr_row;
         std::pair<int, T> pivot {curr_row, (*this)[curr_row][col]};
 
-        for (int i = curr_row + 1; i < col; i++)
+        for (int i = curr_row + 1; i < cols; i++)
         {
             auto elem = (*this)[i][col];
             if (std::abs (pivot.second) < std::abs (elem))
@@ -279,6 +281,8 @@ public:
                 (*this)[j][i] = std::move(tmp);
             }
         }
+
+        return *this;
     }
 
 }; //class
