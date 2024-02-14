@@ -21,7 +21,7 @@ TEST(Test_swap, test2) {
     ASSERT_TRUE(m[0][0] == 3);
 }
 
-TEST(Test_ctor, test3) {
+TEST(Test_swap, test3) {
     Matrix::Matrix<double> m{20, 20, 8};
     m[0][0] = 3;
     m.swap_columns(0, 0);
@@ -71,7 +71,7 @@ TEST(Max_Submatrix_Element, test1) {
 }
 
 TEST(Max_Submatrix_Element, test2) {
-    Matrix::Matrix<double> m{600, 600};
+    Matrix::Matrix<long long> m{600, 600};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution_int(-20, 90);
@@ -107,3 +107,70 @@ TEST(Test_eliminate, test1) {
         ASSERT_TRUE(cmp::is_zero(m[i][0]));
 }
 
+TEST(Test_pivot, test1) {
+    Matrix::Matrix<int> m{10, 10};
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distribution_int(-10, 10);
+
+    for(int i = 0; i < 10; ++i)
+        for(int j = 0; j < 10; ++j) {
+            m[i][j] = distribution_int(gen);
+        }
+    
+    m[5][0] = 200;
+
+    auto [position, pivot] = m.find_pivot(0);
+    ASSERT_TRUE(pivot == m[5][0]);
+}
+
+TEST(Test_transpose, test1) {
+    Matrix::Matrix<int> m{10, 10};
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distribution_int(-100, 100);
+
+    for(int i = 0; i < 10; ++i)
+        for(int j = 0; j < 10; ++j) {
+            m[i][j] = distribution_int(gen);
+        }
+    
+    Matrix::Matrix<int> m2 = m;
+    m2.transpose();
+    m.transpose();
+
+    for(int i = 0; i < 10; ++i)
+        for(int j = 0; j < 10; ++j) {
+            ASSERT_TRUE(m[i][j] == m2[i][j]);
+        }
+}
+
+TEST(Determinant, test1) {
+    Matrix::Matrix<int> m{10, 10};
+    for(int i = 0; i < 10; ++i)
+        for(int j = i; j < 10; ++j) {
+            m[i][j] = 1;
+        }
+    m[9][9] = 10;
+    ASSERT_TRUE(m.determ() == 10);
+}
+
+/*TEST(Determinant, test2) {
+    Matrix::Matrix<unsigned long long> m{5, 5};
+    for(int i = 0; i < 5; ++i)
+        for(int j = i; j < 5; ++j) {
+            m[i][j] = 1;
+        }
+    m[4][4] = 10;
+    ASSERT_TRUE(m.determ() == 10);
+}*/
+
+TEST(Determinant, test3) {
+    Matrix::Matrix<double> m{10, 10};
+    for(int i = 0; i < 10; ++i)
+        for(int j = i; j < 10; ++j) {
+            m[i][j] = 1;
+        }
+    m[9][9] = 0.5;
+    ASSERT_TRUE(m.determ() == 0.5);
+}
