@@ -155,7 +155,7 @@ TEST(Determinant, test1) {
     ASSERT_TRUE(m.determ() == 10);
 }
 
-/*TEST(Determinant, test2) {
+TEST(Determinant, test2) {
     Matrix::Matrix<unsigned long long> m{5, 5};
     for(int i = 0; i < 5; ++i)
         for(int j = i; j < 5; ++j) {
@@ -163,7 +163,7 @@ TEST(Determinant, test1) {
         }
     m[4][4] = 10;
     ASSERT_TRUE(m.determ() == 10);
-}*/
+}
 
 TEST(Determinant, test3) {
     Matrix::Matrix<double> m{10, 10};

@@ -221,7 +221,7 @@ public:
         if (!is_square())
             throw undefined_det{};
 
-        if (std::unsigned_integral<T>) {
+        if constexpr (std::unsigned_integral<T>) {
             Matrix m = *this;
             m.convert_to_double();
             return m.det_gauss();
