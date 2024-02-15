@@ -81,7 +81,7 @@ protected:
     }
 
     ~MatrixBuf() {
-        destroy(arr, arr + rows);
+        destroy(arr, arr + rows*cols);
         ::operator delete (arr);
     }
 };
