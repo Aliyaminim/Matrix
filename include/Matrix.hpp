@@ -6,6 +6,8 @@
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
+#include <memory>
+#include <utility>
 #include <cmath>
 #include <tuple>
 #include <concepts>
@@ -25,17 +27,6 @@ struct undefined_product : public std::runtime_error {
                   : std::runtime_error{"Product A*B of matrices does not exist, because A.cols != B.rows"} {};
 };
 
-template <typename T> void construct(T *p, const T &rhs) { new (p) T(rhs); }
-template <typename T> void construct(T *p, T &&rhs) {
-    new (p) T(std::move(rhs));
-}
-
-template <class S> void destroy(S *p) { p->~S(); }
-template <typename FwdIter> void destroy(FwdIter first, FwdIter last) {
-    while (first != last)
-        destroy(first++);
-}
-
 template<typename T> class Proxy_Row {
     T* row;
 public:
@@ -54,11 +45,8 @@ protected:
     MatrixBuf& operator=(const MatrixBuf &) = delete;
 
     MatrixBuf(MatrixBuf &&rhs) noexcept
-        : arr(rhs.arr), rows(rhs.rows), cols(rhs.cols) {
-        rhs.arr = nullptr;
-        rhs.cols = 0;
-        rhs.rows = 0;
-    }
+        : arr(std::exchange(rhs.arr, nullptr)), rows(std::exchange(rhs.rows, 0)),
+            cols(std::exchange(rhs.cols, 0)) {}
 
     MatrixBuf& operator=(MatrixBuf &&rhs) noexcept {
         std::swap(arr, rhs.arr);
@@ -81,7 +69,7 @@ protected:
     }
 
     ~MatrixBuf() {
-        destroy(arr, arr + rows*cols);
+        std::destroy(arr, arr + rows * cols);
         ::operator delete (arr);
     }
 };
@@ -94,7 +82,6 @@ template<typename T> class Matrix final : private MatrixBuf<T> {
 public:
 
     explicit Matrix(int rows_ = 0, int cols_ = 0, T val = T{}) : MatrixBuf<T>(rows_, cols_) {
-
         std::fill (arr, arr + rows_*cols_, val);
     }
 
@@ -105,7 +92,7 @@ public:
     Matrix(const Matrix &rhs) : MatrixBuf<T>(rhs.rows, rhs.cols) {
         for (int i = 0; i < rows; ++i)
         for (int j = 0; j < cols; ++j)
-            construct(arr + cols*i + j, rhs[i][j]);
+            std::construct_at(arr + cols*i + j, rhs[i][j]);
     }
 
     Matrix &operator=(const Matrix &rhs) {
@@ -146,14 +133,10 @@ public:
         return 1;
     }
 
-
     int swap_columns(const int fst, const int snd) {
         if (fst == snd) return 0;
-        for (int i = 0; i < rows; ++i) {
-            T tmp = std::move((*this)[i][fst]);
-            (*this)[i][fst] = std::move((*this)[i][snd]);
-            (*this)[i][snd] = std::move(tmp);
-        }
+        for (int i = 0; i < rows; ++i)
+            std::swap((*this)[i][fst], (*this)[i][snd]);
         return 1;
     }
 
