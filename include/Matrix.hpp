@@ -40,8 +40,8 @@ template<typename T> class Proxy_Row {
     T* row;
 public:
     explicit Proxy_Row(T* def_ptr): row(def_ptr){}
-    const T &operator[] (int j) const { return row[j]; }
-    T &operator[] (int j)  { return row[j]; }
+    const T &operator[] (std::size_t j) const { return row[j]; }
+    T &operator[] (std::size_t j)  { return row[j]; }
 };
 
 template<typename T> class MatrixBuf {
@@ -119,12 +119,12 @@ public:
 
 public: //operators' overloading
 
-    const Proxy_Row<T> operator[] (int row_i) const
+    const Proxy_Row<T> operator[] (std::size_t row_i) const
     {
         return Proxy_Row<T>{arr + row_i * cols};
     }
 
-    Proxy_Row<T> operator[] (int row_i)
+    Proxy_Row<T> operator[] (std::size_t row_i)
     {
         return Proxy_Row<T>{arr + row_i * cols};
     }
@@ -280,13 +280,9 @@ public:
     Matrix& transpose() & {
         if (!is_square())
             throw undefined_det{"Cannot transpose non-square matrix"};
-        for (int i = 0; i < cols; i++) {
-            for (int j = i + 1; j < cols; j++) {
-                T tmp = std::move((*this)[i][j]);
-                (*this)[i][j] = std::move((*this)[j][i]);
-                (*this)[j][i] = std::move(tmp);
-            }
-        }
+        for (int i = 0; i < cols; i++)
+        for (int j = i + 1; j < cols; j++)
+            std::swap((*this)[i][j], (*this)[j][i]);
 
         return *this;
     }
