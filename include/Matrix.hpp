@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <stdexcept>
 #include <cmath>
 #include <tuple>
 #include <concepts>
