@@ -34,7 +34,8 @@ inline bool greater(double a, double b) {
 }
 
 inline bool greater_equal(double a, double b) {
-    return ((double_comparator(a,b) == -1) || (double_comparator(a,b) == 0));
+    int res = double_comparator(a,b);
+    return ((res == -1) || (res == 0));
 }
 
 inline bool less(double a, double b) {
@@ -42,7 +43,8 @@ inline bool less(double a, double b) {
 }
 
 inline bool less_equal(double a, double b) {
-    return ((double_comparator(a,b) == 1) || (double_comparator(a,b) == 0));
+    int res = double_comparator(a,b);
+    return ((res == 1) || (res == 0));
 }
 
 }
