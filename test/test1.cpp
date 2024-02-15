@@ -40,7 +40,7 @@ TEST(Test_ctor, copy_ctor) {
         for (int j = 0; j < size; ++j) {
             m1[i][j] = distribution_int(gen);
         }
-    
+
     Matrix::Matrix<int> m2 = m1;
 
     for(int i = 0; i < size; ++i)
@@ -57,9 +57,9 @@ TEST(Max_Submatrix_Element, test1) {
 
     int right_max = -21;
     for(int i = 0; i < 500; ++i)
-        for (int j = 0; j < 500; ++j) 
+        for (int j = 0; j < 500; ++j)
             m[i][j] = distribution_int(gen);
-    
+
     int sub_idx = 0;
     for(int i = sub_idx; i < 500; ++i)
         if (m[sub_idx][i] > right_max)
@@ -117,7 +117,7 @@ TEST(Test_pivot, test1) {
         for(int j = 0; j < 10; ++j) {
             m[i][j] = distribution_int(gen);
         }
-    
+
     m[5][0] = 200;
 
     auto [position, pivot] = m.find_pivot(0);
@@ -134,7 +134,7 @@ TEST(Test_transpose, test1) {
         for(int j = 0; j < 10; ++j) {
             m[i][j] = distribution_int(gen);
         }
-    
+
     Matrix::Matrix<int> m2 = m;
     m2.transpose();
     m.transpose();

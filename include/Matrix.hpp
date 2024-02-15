@@ -11,7 +11,7 @@
 #include <type_traits>
 #include "doublecomp.hpp"
 
-namespace yLab { 
+namespace yLab {
 namespace Matrix {
 
 struct undefined_det : public std::runtime_error {
@@ -31,9 +31,9 @@ template <typename T> void construct(T *p, T &&rhs) {
 
 template <class S> void destroy(S *p) { p->~S(); }
 template <typename FwdIter> void destroy(FwdIter first, FwdIter last) {
-    while (first != last) 
+    while (first != last)
         destroy(first++);
-}    
+}
 
 template<typename T> class Proxy_Row {
     T* row;
@@ -46,10 +46,10 @@ public:
 template<typename T> class MatrixBuf {
 protected:
     T* arr = nullptr;
-    int rows = 0; 
+    int rows = 0;
     int cols = 0;
-protected: 
-    MatrixBuf(const MatrixBuf &) = delete; 
+protected:
+    MatrixBuf(const MatrixBuf &) = delete;
     MatrixBuf& operator=(const MatrixBuf &) = delete;
 
     MatrixBuf(MatrixBuf &&rhs) noexcept
@@ -67,7 +67,7 @@ protected:
         return *this;
     }
 
-    explicit MatrixBuf(int rows_ = 0, int cols_ = 0) 
+    explicit MatrixBuf(int rows_ = 0, int cols_ = 0)
         : arr(((rows_ != 0) && (cols_ != 0)) ? static_cast<T*>(::operator new(sizeof(T)*rows_*cols_)) : nullptr)
     {
         if ((rows_ != 0) && (cols_ != 0)) {
@@ -102,8 +102,8 @@ public:
     Matrix &operator=(Matrix &&rhs) = default;
 
     Matrix(const Matrix &rhs) : MatrixBuf<T>(rhs.rows, rhs.cols) {
-        for (int i = 0; i < rows; ++i) 
-        for (int j = 0; j < cols; ++j) 
+        for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j)
             construct(arr + cols*i + j, rhs[i][j]);
     }
 
@@ -128,7 +128,7 @@ public: //operators' overloading
         return Proxy_Row<T>{arr + row_i * cols};
     }
 
-public: 
+public:
     int ncols() const { return cols; }
     int nrows() const { return rows; }
 
@@ -137,7 +137,7 @@ public:
     }
 
     using ElemPtr = T*;
-    using const_ElemPtr = const T*; 
+    using const_ElemPtr = const T*;
 
     int swap_rows(const int fst, const int snd) noexcept {
         if (fst == snd) return 0;
@@ -161,7 +161,7 @@ public:
             T index = (*this)[k][curr_idx] / (*this)[curr_idx][curr_idx];
             for (int m = curr_idx; m < cols; ++m)
                 (*this)[k][m] -= index * (*this)[curr_idx][m];
-        }       
+        }
     }
 
     // Gauss algorithm
@@ -169,37 +169,37 @@ public:
         if (!is_square())
             throw undefined_det{};
 
-        int numofswaps = 0; 
+        int numofswaps = 0;
         for (int i = 0; i < rows; ++i) {
             auto el = max_submatrix_element(i);
             auto pivot = *(std::get<0>(el));
             if (pivot == T{})
                 return pivot;
-    
+
             numofswaps += swap_rows(i, std::get<1>(el));
             numofswaps += swap_columns(i, std::get<2>(el));
-            
+
             eliminate(i);
         }
 
         double res = 1;
         for (int i = 0; i < rows; ++i)
             res *= (*this)[i][i];
-        
-        if (cmp::is_zero(res))  
+
+        if (cmp::is_zero(res))
             res = 0.0;
-        
-        return (numofswaps % 2 == 1) ? -res : res;      
+
+        return (numofswaps % 2 == 1) ? -res : res;
     }
 
     // Bareiss algorithm
-    double det_bareiss () { 
+    double det_bareiss () {
         if (!is_square())
             throw undefined_det{};
         int numofswaps = 0;
         for (int k = 0; k < cols - 1; k++) {
             auto [position, pivot] = find_pivot(k);
-            if (pivot == T{}) 
+            if (pivot == T{})
                 return pivot;
             else {
                 numofswaps += swap_rows(k, position);
@@ -249,7 +249,7 @@ public:
         return res;
     }
 
-    std::pair<int, T> find_pivot (int curr_row) const {   
+    std::pair<int, T> find_pivot (int curr_row) const {
         int col = curr_row;
         std::pair<int, T> pivot {curr_row, (*this)[curr_row][col]};
 

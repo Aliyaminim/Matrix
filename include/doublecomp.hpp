@@ -20,7 +20,7 @@ inline int double_comparator(double a, double b) {
 }
 
 inline bool is_zero(double a) {
-    return (double_comparator(a, 0) == 0);    
+    return (double_comparator(a, 0) == 0);
 }
 
 inline bool equal(double a, double b) {

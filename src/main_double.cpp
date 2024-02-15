@@ -21,7 +21,7 @@ int main() {
     if (std::cin.good()) {
     if (cmp::equal(right_det, det))
         std::cout << " : OK";
-    else 
+    else
         std::cout << " : FAIL " << right_det;
     }
     #endif
