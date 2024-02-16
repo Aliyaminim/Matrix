@@ -128,13 +128,13 @@ public:
         return cols == rows;
     }
 
-    bool swap_rows(const int fst, const int snd) noexcept {
+    bool swap_rows(int fst, int snd) noexcept {
         if (fst == snd) return 0;
         std::swap_ranges(arr + fst*cols, arr + (fst+1)*cols, arr + snd*cols);
         return 1;
     }
 
-    bool swap_columns(const int fst, const int snd) {
+    bool swap_columns(int fst, int snd) {
         if (fst == snd) return 0;
         for (int i = 0; i < rows; ++i)
             std::swap((*this)[i][fst], (*this)[i][snd]);
@@ -155,15 +155,13 @@ public:
             throw undefined_det{};
 
         int numofswaps = 0;
+
         for (int i = 0; i < rows; ++i) {
-            auto el = max_submatrix_element(i);
-            auto pivot = *(std::get<0>(el));
+            auto [row_pivot, pivot] = find_pivot(i);
             if (pivot == T{})
                 return pivot;
 
-            numofswaps += swap_rows(i, std::get<1>(el));
-            numofswaps += swap_columns(i, std::get<2>(el));
-
+            numofswaps += swap_rows(i, row_pivot);
             eliminate(i);
         }
 
@@ -181,7 +179,9 @@ public:
     double det_bareiss () {
         if (!is_square())
             throw undefined_det{};
+
         int numofswaps = 0;
+
         for (int k = 0; k < cols - 1; k++) {
             auto [position, pivot] = find_pivot(k);
             if (pivot == T{})
@@ -221,26 +221,11 @@ public:
         }
     }
 
-    std::tuple<const_ElemPtr, int, int> max_submatrix_element(const int curr_idx) const {
-        if (!is_square())
-            throw undefined_det{};
-
-        auto res = std::make_tuple(&((*this)[curr_idx][curr_idx]), curr_idx, curr_idx);
-        for (int j = curr_idx; j < cols; ++j)
-                if (cmp::greater(fabs((*this)[curr_idx][j]), fabs(*(std::get<0>(res))))) {
-                    std::get<0>(res) = &((*this)[curr_idx][j]);
-                    std::get<1>(res) = curr_idx;
-                    std::get<2>(res) = j;
-                }
-
-        return res;
-    }
-
     std::pair<int, T> find_pivot (int curr_row) const {
         int col = curr_row;
         std::pair<int, T> pivot {curr_row, (*this)[curr_row][col]};
 
-        for (int i = curr_row + 1; i < cols; i++)
+        for (int i = curr_row + 1; i < rows; i++)
         {
             auto elem = (*this)[i][col];
             if (std::abs (pivot.second) < std::abs (elem))
