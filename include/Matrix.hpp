@@ -82,6 +82,7 @@ template<typename T> class Matrix final : private MatrixBuf<T> {
     using ElemPtr = T*;
     using const_ElemPtr = const T*;
 
+    static const int MAX_SIZE_FOR_BAREISS_ALG = 20;
 public:
 
     explicit Matrix(int rows_ = 0, int cols_ = 0, T val = T{}) : MatrixBuf<T>(rows_, cols_) {
@@ -206,12 +207,14 @@ public:
             throw undefined_det{};
 
         if constexpr (std::unsigned_integral<T>) {
-            Matrix m = *this;
-            m.convert_to_double();
+            Matrix<double> m = convert_to_double();
             return m.det_gauss();
-        } else if (std::signed_integral<T>) {
+        } else if ((std::signed_integral<T>) && (cols < MAX_SIZE_FOR_BAREISS_ALG)) {
             Matrix m = *this;
             return m.det_bareiss();
+        } else if ((std::signed_integral<T>) && (cols >= MAX_SIZE_FOR_BAREISS_ALG)) {
+            Matrix<double> m = convert_to_double();
+            return m.det_gauss();
         } else {
             Matrix m = *this;
             return m.det_gauss();
@@ -250,12 +253,13 @@ public:
         return pivot;
     }
 
-    void convert_to_double() {
-        for (int i = 0; i < rows; i++){
-        for (int j = 0; j < cols; j++){
-            (*this)[i][j] = static_cast<double>((*this)[i][j]);
-        }
-        }
+    Matrix<double> convert_to_double() const {
+        Matrix<double> res{rows, cols};
+        for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = static_cast<double>((*this)[i][j]);
+
+        return res;
     }
 
 public:
