@@ -75,3 +75,10 @@ TEST(Determinant, test3) {
     m[9][9] = 0.5;
     ASSERT_TRUE(m.determ() == 0.5);
 }
+
+TEST(Determinantm, test4) {
+    Matrix::Matrix<long long> m{5, 5};
+    for(int i = 1; i < 5; ++i)
+        m[i][i] = 1;
+    ASSERT_TRUE(m.determ() == 0);
+}
