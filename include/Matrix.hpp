@@ -40,7 +40,7 @@ protected:
     T* arr = nullptr;
     int rows = 0;
     int cols = 0;
-protected:
+
     MatrixBuf(const MatrixBuf &) = delete;
     MatrixBuf& operator=(const MatrixBuf &) = delete;
 
@@ -78,6 +78,9 @@ template<typename T> class Matrix final : private MatrixBuf<T> {
     using MatrixBuf<T>::arr;
     using MatrixBuf<T>::rows;
     using MatrixBuf<T>::cols;
+
+    using ElemPtr = T*;
+    using const_ElemPtr = const T*;
 
 public:
 
@@ -124,16 +127,13 @@ public:
         return cols == rows;
     }
 
-    using ElemPtr = T*;
-    using const_ElemPtr = const T*;
-
-    int swap_rows(const int fst, const int snd) noexcept {
+    bool swap_rows(const int fst, const int snd) noexcept {
         if (fst == snd) return 0;
         std::swap_ranges(arr + fst*cols, arr + (fst+1)*cols, arr + snd*cols);
         return 1;
     }
 
-    int swap_columns(const int fst, const int snd) {
+    bool swap_columns(const int fst, const int snd) {
         if (fst == snd) return 0;
         for (int i = 0; i < rows; ++i)
             std::swap((*this)[i][fst], (*this)[i][snd]);
