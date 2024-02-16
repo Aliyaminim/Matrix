@@ -60,16 +60,8 @@ protected:
     }
 
     explicit MatrixBuf(int rows_ = 0, int cols_ = 0)
-        : arr(((rows_ != 0) && (cols_ != 0)) ? static_cast<T*>(::operator new(sizeof(T)*rows_*cols_)) : nullptr)
-    {
-        if ((rows_ != 0) && (cols_ != 0)) {
-            rows = rows_;
-            cols = cols_;
-        } else {
-            rows = 0;
-            cols = 0;
-        }
-    }
+        : arr(((rows_ != 0) && (cols_ != 0)) ? static_cast<T*>(::operator new(sizeof(T)*rows_*cols_)) : nullptr),
+            rows(rows_), cols(cols_) {}
 
     ~MatrixBuf() {
         std::destroy(arr, arr + rows * cols);
@@ -123,13 +115,14 @@ public: //operators' overloading
         return Proxy_Row<T>{arr + row_i * cols};
     }
 
-public:
     int ncols() const { return cols; }
     int nrows() const { return rows; }
 
     bool is_square() const {
         return cols == rows;
     }
+
+private:
 
     bool swap_rows(int fst, int snd) noexcept {
         if (fst == snd) return 0;
@@ -152,6 +145,7 @@ public:
         }
     }
 
+public:
     // Gauss algorithm
     double det_gauss() {
         if (!is_square())
@@ -224,6 +218,26 @@ public:
         }
     }
 
+    Matrix& transpose() & {
+        if (!is_square())
+            throw undefined_det{"Cannot transpose non-square matrix"};
+        for (int i = 0; i < cols; i++)
+        for (int j = i + 1; j < cols; j++)
+            std::swap((*this)[i][j], (*this)[j][i]);
+
+        return *this;
+    }
+
+private:
+    Matrix<double> convert_to_double() const {
+        Matrix<double> res{rows, cols};
+        for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            res[i][j] = static_cast<double>((*this)[i][j]);
+
+        return res;
+    }
+
     std::pair<int, T> find_pivot (int curr_row) const {
         int col = curr_row;
         std::pair<int, T> pivot {curr_row, (*this)[curr_row][col]};
@@ -239,27 +253,6 @@ public:
         }
 
         return pivot;
-    }
-
-    Matrix<double> convert_to_double() const {
-        Matrix<double> res{rows, cols};
-        for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++)
-            res[i][j] = static_cast<double>((*this)[i][j]);
-
-        return res;
-    }
-
-public:
-
-    Matrix& transpose() & {
-        if (!is_square())
-            throw undefined_det{"Cannot transpose non-square matrix"};
-        for (int i = 0; i < cols; i++)
-        for (int j = i + 1; j < cols; j++)
-            std::swap((*this)[i][j], (*this)[j][i]);
-
-        return *this;
     }
 
 }; //class
