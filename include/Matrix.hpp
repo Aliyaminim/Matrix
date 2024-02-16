@@ -45,8 +45,11 @@ protected:
     MatrixBuf& operator=(const MatrixBuf &) = delete;
 
     MatrixBuf(MatrixBuf &&rhs) noexcept
-        : arr(std::exchange(rhs.arr, nullptr)), rows(std::exchange(rhs.rows, 0)),
-            cols(std::exchange(rhs.cols, 0)) {}
+        : arr(rhs.arr), rows(rhs.rows), cols(rhs.cols) {
+        rhs.arr = nullptr;
+        rhs.cols = 0;
+        rhs.rows = 0;
+    }
 
     MatrixBuf& operator=(MatrixBuf &&rhs) noexcept {
         std::swap(arr, rhs.arr);
