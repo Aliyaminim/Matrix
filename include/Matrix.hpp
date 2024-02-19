@@ -115,8 +115,8 @@ public: //operators' overloading
         return Proxy_Row<T>{arr + row_i * cols};
     }
 
-    int ncols() const { return cols; }
-    int nrows() const { return rows; }
+    std::size_t ncols() const noexcept { return cols; }
+    std::size_t nrows() const noexcept { return rows; }
 
     bool is_square() const {
         return cols == rows;
@@ -125,16 +125,16 @@ public: //operators' overloading
 private:
 
     bool swap_rows(int fst, int snd) noexcept {
-        if (fst == snd) return 0;
+        if (fst == snd) return false;
         std::swap_ranges(arr + fst*cols, arr + (fst+1)*cols, arr + snd*cols);
-        return 1;
+        return true;
     }
 
     bool swap_columns(int fst, int snd) {
-        if (fst == snd) return 0;
+        if (fst == snd) return false;
         for (int i = 0; i < rows; ++i)
             std::swap((*this)[i][fst], (*this)[i][snd]);
-        return 1;
+        return true;
     }
 
     void eliminate(int curr_idx) {
@@ -206,12 +206,14 @@ public:
         if constexpr (std::unsigned_integral<T>) {
             Matrix<double> m = convert_to_double();
             return m.det_gauss();
-        } else if ((std::signed_integral<T>) && (cols < MAX_SIZE_FOR_BAREISS_ALG)) {
-            Matrix m = *this;
-            return m.det_bareiss();
-        } else if ((std::signed_integral<T>) && (cols >= MAX_SIZE_FOR_BAREISS_ALG)) {
-            Matrix<double> m = convert_to_double();
-            return m.det_gauss();
+        } else if (std::signed_integral<T>) {
+            if (cols < MAX_SIZE_FOR_BAREISS_ALG) {
+                Matrix m = *this;
+                return m.det_bareiss();
+            } else {
+                Matrix<double> m = convert_to_double();
+                return m.det_gauss();
+            }
         } else {
             Matrix m = *this;
             return m.det_gauss();
