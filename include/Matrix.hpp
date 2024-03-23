@@ -300,8 +300,8 @@ inline std::ostream& operator<< (std::ostream &os, const Matrix<T> &matrix) {
 
 template<typename T>
 inline void read(std::istream &is, Matrix<T> &matrix) {
-    auto n_cols = matrix.ncols();
-    auto n_rows = matrix.nrows();
+    int n_cols = matrix.ncols();
+    int n_rows = matrix.nrows();
 
     for (int i = 0; i < n_rows; ++i) {
         for (int j = 0; j < n_cols; ++j) {
