@@ -12,7 +12,7 @@ cmake --build .
 
 ## How to run the program
 ```bash
-./ParaCL < [file]
+./maind < [file]
 ```
 
 ## How to test the program
