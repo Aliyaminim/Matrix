@@ -1,10 +1,22 @@
 # Matrix
-Contributors: Minimullina Aliya
+Implementation of a template class Matrix that includes a method for computing determinant using Bareiss and Gauss algorithms.
 
-To install and run the code, follow these steps:
+## How to build
+```bash
+git clone https://github.com/Aliyaminim/Matrix.git
+cd Matrix
+cmake -S ./ -B build/
+cd build/
+cmake --build .
+```
 
-    git clone https://github.com/Aliyaminim/Matrix.git
-    cd Matrix
-    bash run.sh
-    cd test
-    bash testing.sh
+## How to run the program
+```bash
+./ParaCL < [file]
+```
+
+## How to test the program
+```bash
+cd ../test
+bash testing.sh
+```
